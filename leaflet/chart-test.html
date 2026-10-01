@@ -10,29 +10,7 @@
 
   <canvas id="myChart"></canvas>
 
-  <script>
-    const ctx = document.getElementById('myChart');
-
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['January', 'February', 'March', 'April'],
-        datasets: [{
-          label: 'Sales',
-          data: [12, 19, 8, 15],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  </script>
+  <script src="/chart/test-chart.js"></script>
 
 </body>
 </html>

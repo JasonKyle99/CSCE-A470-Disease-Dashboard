@@ -114,10 +114,43 @@
     function onEachFeature(feature, layer) {
         layer.on({
             mouseover: highlightFeature,
-            mouseout: resetHighlight
+            mouseout: resetHighlight,
+            click: showGraph
         });
     }
 
+    function showGraph(e) {
+        var countryCode = e.target.feature.properties.id;
+        var data = diseaseData[countryCode];
+        var countryName = e.target.feature.properties.name
+
+        if (!data) {
+            e.target.bindPopup('<strong>No disease data available for this country.</strong>').openPopup();
+            return;
+        }
+
+        var values = Object.keys(data).filter(function (key) {
+            return typeof data[key] === 'number' && isFinite(data[key]);
+        });
+
+        if (values.length === 0) {
+            e.target.bindPopup('<strong>No graphable disease data available.</strong>').openPopup();
+            return;
+        }
+
+        var graph = '<div style="min-width:220px"><strong>' + countryName + '</strong>' +
+            '<div style="margin-top:8px">';
+
+        values.forEach(function (key) {
+            var value = data[key];
+            graph += '<div style="margin:6px 0;font-size:12px">' +
+                '<div>' + key + ': ' + value + '</div>' +
+                '</div>';
+        });
+
+        graph += '</div></div>';
+        e.target.bindPopup(graph).openPopup();
+    }
 
     /* Create the GeoJSON layer */
     var geojson = L.geoJson(locationData, {
