@@ -1,74 +1,196 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Leaflet Map</title>
+    <meta charset="UTF-8">
+
+    <title>Disease Map</title>
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet"
-          href="dist/leaflet.css"
-          />
-
-    <!-- Map height -->
+    <link rel="stylesheet" href="dist/leaflet.css">
+	<link rel="stylesheet" href="style.css">
     <style>
         #map {
-            height: 500px;
+            height: 600px;
+            width: 100%;
+			
+        }
+
+        #controls {
+            padding: 10px;
+            background: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #yearSlider {
+            margin-left: 10px;
+            width: 250px;
+            vertical-align: middle;
+        }
+
+        #yearValue {
+            margin-left: 8px;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Where the map will appear -->
+    <!-- Controls -->
+	
+<!-- Map Title -->
+
+	<div id="mapTitle">
+		<h1>Disease Map</h1>
+	</div>
+    <div id="controls">
+
+        <label for="yearSlider">
+            <strong>Year:</strong>
+            <span id="yearValue">2016</span>
+        </label>
+
+        <input
+            type="range"
+            id="yearSlider"
+            min="2000"
+            max="2016"
+            step="1"
+            value="2016"
+        >
+    </div>
+
+	<!-- Map Layout -->
+
+	<div id="mapLayout">
+
+		<!-- Left Box -->
+		<div id="leftBox">
+		</div>
+
+
+		<!-- Map -->
+		<div id="map">
+		</div>
+
+
+		<!-- Right Box -->
+		<div id="rightBox">
+		</div>
+
+	</div>
+
+
+
+
+
+    <!-- Map -->
     <div id="map"></div>
 
-    <!-- Leaflet JavaScript and js for location geodata -->
-    <script src="dist/leaflet.js"
-            ></script>
-	
-	<!-- Leaflet JavaScript and js for location geodata -->
-    <script src="locations.js"
-            ></script>
-	
-    <script src="diseaseData.js"
-            ></script>
 
-    <!-- Your Leaflet code -->
-<script>
-    var map = L.map('map').setView([37.8, -96], 2);
+    <!-- Leaflet JavaScript -->
+    <script src="dist/leaflet.js"></script>
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors',
-        referrerPolicy: 'strict-origin-when-cross-origin'
-    }).addTo(map);
+    <!-- Country location GeoJSON -->
+    <script src="locations.js"></script>
+
+    <!-- Disease data -->
+    <script src="diseaseData.js"></script>
 
 
-    /* Determines what color the polygons will be */
-    function getColor(d) {
-        return d > 20 ? '#800026' :
-               d > 10 ? '#BD0026' :
-               d > 5  ? '#E31A1C' :
-               d > 4  ? '#FC4E2A' :
-               d > 3  ? '#FD8D3C' :
-               d > 2  ? '#FEB24C' :
-               d > 1  ? '#FED976' :
-                        '#FFEDA0';
-    }
+    <script>
+
+        // ==========================================
+        // SELECTED YEAR
+        // ==========================================
+
+        var selectedYear = 2016;
 
 
-    /* Applies color from function "getColor" */
-    function style(feature) {
+        // ==========================================
+        // CREATE MAP
+        // ==========================================
 
-        /* Get country code from locationData */
-        var countryCode = feature.properties.id;
+        var map = L.map('map').setView([37.8, -96], 2);
 
-        /* Find matching country in diseaseData */
-        var data = diseaseData[countryCode];
 
-        /* If country does not have disease data */
-        if (!data) {
+        // OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors',
+            referrerPolicy: 'strict-origin-when-cross-origin'
+        }).addTo(map);
+
+
+        // ==========================================
+        // COLOR SCALE
+        // ==========================================
+
+        function getColor(d) {
+
+            return d > 20 ? '#800026' :
+                   d > 10 ? '#BD0026' :
+                   d > 5  ? '#E31A1C' :
+                   d > 4  ? '#FC4E2A' :
+                   d > 3  ? '#FD8D3C' :
+                   d > 2  ? '#FEB24C' :
+                   d > 1  ? '#FED976' :
+                            '#FFEDA0';
+        }
+
+
+        // ==========================================
+        // STYLE COUNTRIES
+        // ==========================================
+
+        function style(feature) {
+
+            // Get country code from locations.js
+            var countryCode = feature.properties.id;
+
+            // Find country in diseaseData.js
+            var country = diseaseData[countryCode];
+
+
+            // No disease data for this country
+            if (!country) {
+
+                return {
+                    fillColor: '#CCCCCC',
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
+
+
+            // Get data for selected year
+            var yearData = country.data[selectedYear];
+
+
+            // No data for this year
+            if (!yearData) {
+
+                return {
+                    fillColor: '#CCCCCC',
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
+
+
+            // Get density for selected year
+            var density = yearData.density;
+
+
+            // Return styling
             return {
-                fillColor: '#CCCCCC',
+                fillColor: getColor(density),
                 weight: 2,
                 opacity: 1,
                 color: 'white',
@@ -77,88 +199,176 @@
             };
         }
 
-        /* Apply color based on disease density */
-        return {
-            fillColor: getColor(data.density),
-            weight: 2,
-            opacity: 1,
-            color: 'white',
-            dashArray: '3',
-            fillOpacity: 0.7
-        };
-    }
 
+        // ==========================================
+        // HIGHLIGHT COUNTRY
+        // ==========================================
 
-    /* Function that highlights region hovered */
-    function highlightFeature(e) {
-        var layer = e.target;
+        function highlightFeature(e) {
 
-        layer.setStyle({
-            weight: 3,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
+            var layer = e.target;
 
-        layer.bringToFront();
-    }
+            layer.setStyle({
+                weight: 3,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.7
+            });
 
-
-    /* Function that resets highlight when mouse leaves */
-    function resetHighlight(e) {
-        geojson.resetStyle(e.target);
-    }
-
-
-    /* Function that calls highlightFeature and resetHighlight */
-    function onEachFeature(feature, layer) {
-        layer.on({
-            mouseover: highlightFeature,
-            mouseout: resetHighlight,
-            click: showGraph
-        });
-    }
-
-    function showGraph(e) {
-        var countryCode = e.target.feature.properties.id;
-        var data = diseaseData[countryCode];
-        var countryName = e.target.feature.properties.name
-
-        if (!data) {
-            e.target.bindPopup('<strong>No disease data available for this country.</strong>').openPopup();
-            return;
+            layer.bringToFront();
         }
 
-        var values = Object.keys(data).filter(function (key) {
-            return typeof data[key] === 'number' && isFinite(data[key]);
-        });
 
-        if (values.length === 0) {
-            e.target.bindPopup('<strong>No graphable disease data available.</strong>').openPopup();
-            return;
+        // ==========================================
+        // RESET COUNTRY
+        // ==========================================
+
+        function resetHighlight(e) {
+
+            geojson.resetStyle(e.target);
         }
 
-        var graph = '<div style="min-width:220px"><strong>' + countryName + '</strong>' +
-            '<div style="margin-top:8px">';
 
-        values.forEach(function (key) {
-            var value = data[key];
-            graph += '<div style="margin:6px 0;font-size:12px">' +
-                '<div>' + key + ': ' + value + '</div>' +
-                '</div>';
+        // ==========================================
+        // COUNTRY POPUP
+        // ==========================================
+
+        function createPopup(feature, layer) {
+
+            // Get country code
+            var countryCode = feature.properties.id;
+
+            // Get country
+            var country = diseaseData[countryCode];
+
+
+            // If country isn't in diseaseData
+            if (!country) {
+                return;
+            }
+
+
+            // Get selected year's data
+            var yearData = country.data[selectedYear];
+
+
+            // If selected year doesn't exist
+            if (!yearData) {
+                return;
+            }
+
+
+            // Create popup
+            layer.bindPopup(
+                '<strong>' + country.name + '</strong><br>' +
+                'Year: ' + selectedYear + '<br>' +
+                'Genotyped cases: ' + yearData.genotypedCases + '<br>' +
+                'Bovis cases: ' + yearData.bovisCases + '<br>' +
+                'Bovis percent: ' + yearData.bovisPercent + '%<br>' +
+                'US born: ' + yearData.usBorn + '<br>' +
+                'Non-US born: ' + yearData.nonUsBorn + '<br>' +
+                'Density: ' + yearData.density
+            );
+        }
+
+
+        // ==========================================
+        // COUNTRY FEATURES
+        // ==========================================
+
+        function onEachFeature(feature, layer) {
+
+            // Mouse events
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight
+            });
+
+
+            // Create popup
+            createPopup(feature, layer);
+        }
+
+
+        // ==========================================
+        // CREATE GEOJSON LAYER
+        // ==========================================
+
+        var geojson = L.geoJson(locationData, {
+
+            style: style,
+
+            onEachFeature: onEachFeature
+
+        }).addTo(map);
+
+
+        // ==========================================
+        // YEAR SLIDER
+        // ==========================================
+
+        var yearSlider = document.getElementById('yearSlider');
+
+        var yearValue = document.getElementById('yearValue');
+
+
+        yearSlider.addEventListener('input', function() {
+
+            // Get year from slider
+            selectedYear = Number(this.value);
+
+
+            // Update displayed year
+            yearValue.textContent = selectedYear;
+
+
+            // Re-style all countries
+            geojson.setStyle(style);
+
+
+            // Update popups
+            geojson.eachLayer(function(layer) {
+
+                var feature = layer.feature;
+
+                var countryCode = feature.properties.id;
+
+                var country = diseaseData[countryCode];
+
+
+                // No disease data
+                if (!country) {
+                    return;
+                }
+
+
+                // Get data for selected year
+                var yearData = country.data[selectedYear];
+
+
+                // No data for this year
+                if (!yearData) {
+                    return;
+                }
+
+
+                // Update popup
+                layer.bindPopup(
+                    '<strong>' + country.name + '</strong><br>' +
+                    'Year: ' + selectedYear + '<br>' +
+                    'Genotyped cases: ' + yearData.genotypedCases + '<br>' +
+                    'Bovis cases: ' + yearData.bovisCases + '<br>' +
+                    'Bovis percent: ' + yearData.bovisPercent + '%<br>' +
+                    'US born: ' + yearData.usBorn + '<br>' +
+                    'Non-US born: ' + yearData.nonUsBorn + '<br>' +
+                    'Density: ' + yearData.density
+                );
+
+            });
+
         });
 
-        graph += '</div></div>';
-        e.target.bindPopup(graph).openPopup();
-    }
-
-    /* Create the GeoJSON layer */
-    var geojson = L.geoJson(locationData, {
-        style: style,
-        onEachFeature: onEachFeature
-    }).addTo(map);
-
-</script>
+    </script>
 
 </body>
 </html>
