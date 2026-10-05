@@ -1,0 +1,60 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  min-height: 100vh;
+}
+
+.content {
+  padding: 2rem;
+}
+
+.date-filter {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  position: absolute;
+  z-index: 1000;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 1px 5px rgb(0 0 0 / 40%);
+}
+
+#date-slider {
+  width: 100%;
+}
+
+#map {
+  position: relative;
+  height: 100vh;
+  min-height: 400px;
+}
+
+@media (max-width: 700px) {
+  body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  #map {
+    height: 50vh;
+  }
+
+  .date-filter {
+    grid-template-columns: 1fr auto;
+  }
+
+  .date-filter label {
+    grid-column: 1 / -1;
+  }
+}

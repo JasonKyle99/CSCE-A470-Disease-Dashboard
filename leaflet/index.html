@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disease Dashboard</title>
+    <link rel="stylesheet" href="dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <main class="content">
+        <header>
+            <h1>Tuberculosis Dashboard</h1>
+        </header>
+        <p>
+            The purpose of this purpose of this app is to promote public health awareness related to zoonotic Tuberculosis.
+        </p>
+    </main>
+    <div id="map" aria-label="Map of the Americas">
+      <section class="date-filter" aria-labelledby="date-label">
+        <label id="date-label" for="date-slider">Select year</label>
+        <input id="date-slider" type="range" />
+        <output id="selected-year" for="date-slider"></output>
+      </section>
+    </div>
+    <script src="dist/leaflet.js"></script>
+    <script src="locations.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/date-slider.js"></script>
+  </body>
+  </html>
