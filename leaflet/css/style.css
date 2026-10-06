@@ -2,6 +2,8 @@ html,
 body {
   height: 100%;
   margin: 0;
+  font-family: 'Times New Roman', Georgia, sans-serif;
+  background-color: bisque;
 }
 
 body {
@@ -39,6 +41,8 @@ body {
   height: 100vh;
   min-height: 400px;
 }
+
+/*.site-header */
 
 @media (max-width: 700px) {
   body {
