@@ -246,8 +246,14 @@ function resetHighlight(e) {
 }
 
 function showFeatureName(e) {
-    var featureName = e.target.feature.properties.ADMIN;
-    e.target.bindPopup(featureName).openPopup();
+    var feature = e.target.feature;
+    var countryName = normalizeCountryName(feature.properties.ADMIN);
+    var incidentsByYear = incidentsByCountryAndYear[countryName];
+    var incidents = incidentsByYear && incidentsByYear[dateSlider.value];
+
+    var popupText = feature.properties.ADMIN + ': ' + incidents.toLocaleString() + ' TB incidents in ' + dateSlider.value;
+
+    e.target.bindPopup(popupText).openPopup();
 }
 
 /* Function that calls highlightFeature and resetHighlight */
