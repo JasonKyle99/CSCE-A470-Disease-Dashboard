@@ -42,6 +42,43 @@ body {
   min-height: 400px;
 }
 
+.map-legend {
+  min-width: 170px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.25rem;
+  background: white;
+  box-shadow: 0 1px 5px rgb(0 0 0 / 40%);
+  color: #1f2937;
+  font: 12px/1.4 Arial, sans-serif;
+}
+
+.legend-gradient {
+  height: 12px;
+  margin-top: 0.4rem;
+  border: 1px solid #9ca3af;
+  background: linear-gradient(to right, #ffffff 0%, #ffa500 50%, #dc2626 100%);
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.15rem;
+}
+
+.legend-no-data {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.legend-no-data span {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #9ca3af;
+  background: #cbd5e1;
+}
+
 /*.site-header */
 
 @media (max-width: 700px) {

@@ -1,6 +1,8 @@
 var geoJSON;
 var incidentsByCountryAndYear = {};
 var currentYearIncidents = [];
+var maximumIncidentCount = 0;
+var colorScaleMaximum = 0;
 var dateSlider = document.getElementById('date-slider');
 var countryNameAliases = {
     bahamas: 'thebahamas',
@@ -11,6 +13,11 @@ var map = L.map('map', {
     maxBounds: americasBounds,
     maxBoundsViscosity: 1
 });
+var legend = L.control({ position: 'topright' });
+legend.onAdd = function () {
+    return L.DomUtil.create('div', 'map-legend');
+};
+legend.addTo(map);
 
 function fitMapToAmericas() {
     map.setMinZoom(0);
@@ -81,11 +88,15 @@ function loadIncidentData(csvText) {
             return;
         }
 
+        maximumIncidentCount = Math.max(maximumIncidentCount, incidents);
+
         if (!incidentsByCountryAndYear[nation]) {
             incidentsByCountryAndYear[nation] = {};
         }
         incidentsByCountryAndYear[nation][year] = incidents;
     });
+
+    colorScaleMaximum = Math.ceil(maximumIncidentCount / 100) * 100;
 }
 
 function getColor(value, minimum, maximum) {
@@ -93,7 +104,7 @@ function getColor(value, minimum, maximum) {
         return '#ffffff';
     }
 
-    var ratio = (value - minimum) / (maximum - minimum);
+    var ratio = Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)));
     var white = [255, 255, 255];
     var orange = [255, 165, 0];
     var red = [220, 38, 38];
@@ -126,11 +137,7 @@ function getCountryStyle(feature) {
     return {
         color: '#475569',
         weight: 0.8,
-        fillColor: getColor(
-            incidents,
-            Math.min.apply(null, currentYearIncidents),
-            Math.max.apply(null, currentYearIncidents)
-        ),
+        fillColor: getColor(incidents, 0, colorScaleMaximum),
         fillOpacity: 0.7
     };
 }
@@ -147,11 +154,36 @@ function updateMapForSelectedYear() {
         []
     );
 
+    updateLegend();
+
     if (!geoJSON) {
         return;
     }
 
     geoJSON.setStyle(getCountryStyle);
+}
+
+function updateLegend() {
+    var container = legend.getContainer();
+    var year = dateSlider.value;
+
+    if (currentYearIncidents.length === 0) {
+        container.innerHTML = '<strong>TB incidents (' + year +
+            ')</strong><div>No data available</div>';
+        return;
+    }
+
+    var midpoint = Math.round(colorScaleMaximum / 2);
+
+    container.innerHTML =
+        '<strong>TB incidents (' + year + ')</strong>' +
+        '<div class="legend-gradient" aria-hidden="true"></div>' +
+        '<div class="legend-labels"><span>0</span><span>' +
+        midpoint.toLocaleString() +
+        '</span><span>' +
+        colorScaleMaximum.toLocaleString() +
+        '</span></div>' +
+        '<div class="legend-no-data"><span></span>No data</div>';
 }
 
 dateSlider.addEventListener('input', updateMapForSelectedYear);
