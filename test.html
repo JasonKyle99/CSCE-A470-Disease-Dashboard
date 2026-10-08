@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Leaflet Map</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet"
+          href="dist/leaflet.css"
+          />
+
+    <!-- Map height -->
+    <style>
+        #map {
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Where the map will appear -->
+    <div id="map"></div>
+
+    <!-- Leaflet JavaScript and js for location geodata -->
+    <script src="dist/leaflet.js"
+            ></script>
+	
+	<!-- Leaflet JavaScript and js for location geodata -->
+    <script src="locations.js"
+            ></script>
+	
+    <script src="diseaseData.js"
+            ></script>
+
+    <!-- Your Leaflet code -->
+<script>
+    var map = L.map('map').setView([37.8, -96], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+        referrerPolicy: 'strict-origin-when-cross-origin'
+    }).addTo(map);
+
+
+    /* Determines what color the polygons will be */
+    function getColor(d) {
+        return d > 20 ? '#800026' :
+               d > 10 ? '#BD0026' :
+               d > 5  ? '#E31A1C' :
+               d > 4  ? '#FC4E2A' :
+               d > 3  ? '#FD8D3C' :
+               d > 2  ? '#FEB24C' :
+               d > 1  ? '#FED976' :
+                        '#FFEDA0';
+    }
+
+
+    /* Applies color from function "getColor" */
+    function style(feature) {
+
+        /* Get country code from locationData */
+        var countryCode = feature.properties.id;
+
+        /* Find matching country in diseaseData */
+        var data = diseaseData[countryCode];
+
+        /* If country does not have disease data */
+        if (!data) {
+            return {
+                fillColor: '#CCCCCC',
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.7
+            };
+        }
+
+        /* Apply color based on disease density */
+        return {
+            fillColor: getColor(data.density),
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7
+        };
+    }
+
+
+    /* Function that highlights region hovered */
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 3,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+
+        layer.bringToFront();
+    }
+
+
+    /* Function that resets highlight when mouse leaves */
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+    }
+
+
+    /* Function that calls highlightFeature and resetHighlight */
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: showGraph
+        });
+    }
+
+    function showGraph(e) {
+        var countryCode = e.target.feature.properties.id;
+        var data = diseaseData[countryCode];
+        var countryName = e.target.feature.properties.name
+
+        if (!data) {
+            e.target.bindPopup('<strong>No disease data available for this country.</strong>').openPopup();
+            return;
+        }
+
+        var values = Object.keys(data).filter(function (key) {
+            return typeof data[key] === 'number' && isFinite(data[key]);
+        });
+
+        if (values.length === 0) {
+            e.target.bindPopup('<strong>No graphable disease data available.</strong>').openPopup();
+            return;
+        }
+
+        var graph = '<div style="min-width:220px"><strong>' + countryName + '</strong>' +
+            '<div style="margin-top:8px">';
+
+        values.forEach(function (key) {
+            var value = data[key];
+            graph += '<div style="margin:6px 0;font-size:12px">' +
+                '<div>' + key + ': ' + value + '</div>' +
+                '</div>';
+        });
+
+        graph += '</div></div>';
+        e.target.bindPopup(graph).openPopup();
+    }
+
+    /* Create the GeoJSON layer */
+    var geojson = L.geoJson(locationData, {
+        style: style,
+        onEachFeature: onEachFeature
+    }).addTo(map);
+
+</script>
+
+</body>
+</html>
