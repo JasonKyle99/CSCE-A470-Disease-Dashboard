@@ -11,8 +11,18 @@ var map = L.map('map', {
     maxBounds: americasBounds,
     maxBoundsViscosity: 1
 });
-map.fitBounds(americasBounds);
-map.setMinZoom(map.getZoom());
+
+function fitMapToAmericas() {
+    map.setMinZoom(0);
+    map.invalidateSize({ pan: false });
+    map.fitBounds(americasBounds);
+    map.setMinZoom(map.getZoom());
+}
+
+fitMapToAmericas();
+window.addEventListener('resize', function () {
+    window.requestAnimationFrame(fitMapToAmericas);
+});
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
