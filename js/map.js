@@ -8,28 +8,19 @@ var countryNameAliases = {
     bahamas: 'thebahamas',
     unitedstates: 'unitedstatesofamerica'
 };
-var americasBounds = L.latLngBounds([[-56, -170], [72, -30]]);
+var americasBounds = L.latLngBounds([[-70, -190], [85, -10]]);
 var map = L.map('map', {
     maxBounds: americasBounds,
     maxBoundsViscosity: 1
 });
+
+map.fitBounds(americasBounds);
+
 var legend = L.control({ position: 'topright' });
 legend.onAdd = function () {
     return L.DomUtil.create('div', 'map-legend');
 };
 legend.addTo(map);
-
-function fitMapToAmericas() {
-    map.setMinZoom(0);
-    map.invalidateSize({ pan: false });
-    map.fitBounds(americasBounds);
-    map.setMinZoom(map.getZoom());
-}
-
-fitMapToAmericas();
-window.addEventListener('resize', function () {
-    window.requestAnimationFrame(fitMapToAmericas);
-});
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
