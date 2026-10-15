@@ -195,7 +195,7 @@ Promise.all([
         }
         return response.json();
     }),
-    fetch('data/sample-data.csv').then(function (response) {
+    fetch('data/data.csv').then(function (response) {
         if (!response.ok) {
             throw new Error('Could not load incident data: ' + response.status);
         }
