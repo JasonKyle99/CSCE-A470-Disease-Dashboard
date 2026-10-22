@@ -4,6 +4,7 @@ var currentYearIncidents = [];
 var maximumIncidentCount = 0;
 var colorScaleMaximum = 0;
 var dateSlider = document.getElementById('date-slider');
+dateSlider.addEventListener('input', updateMapForSelectedYear);
 var countryNameAliases = {
     bahamas: 'thebahamas',
     unitedstates: 'unitedstatesofamerica'
@@ -186,7 +187,7 @@ Promise.all([
         }
         return response.json();
     }),
-    fetch('data/data.csv').then(function (response) {
+    fetch('data/TB/Output%20Data/data.csv').then(function (response) {
         if (!response.ok) {
             throw new Error('Could not load incident data: ' + response.status);
         }

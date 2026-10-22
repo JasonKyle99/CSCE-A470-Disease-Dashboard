@@ -1,35 +1,88 @@
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Disease Dashboard</title>
-    <link rel="stylesheet" href="dist/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="icon" type="image/png" href="assets/favicon.png" />
-  </head>
-  <body>
-    <main class="content">
-        <header class="site-header">
-            <h1>Tuberculosis Dashboard</h1>
-        </header>
-        <p>
-            The purpose of this purpose of this app is to promote public health awareness related to zoonotic Tuberculosis.
-        </p>
-        <section class="country-card" aria-live="polite">
-            <p>Click on a country to learn more</p>
+
+    <link rel="stylesheet" href="dist/leaflet.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+
+
+<main class="dashboard">
+
+    <!-- Left sidebar -->
+    <aside>
+      <header>
+    <h1 id="dashboard-title">Tuberculosis Dashboard</h1>
+</header>
+        <label for="disease-select">Select disease</label>
+        <select id="disease-select">
+            <option value="Tuberculosis">Tuberculosis</option>
+            <option value="Test">Test</option>
+
+        </select>
+
+        <nav class="tabs">
+            <button class="active" data-tab="one-health">
+                One Health Approach
+            </button>
+            <button data-tab="disease">
+                Disease Information
+            </button>
+            <button data-tab="data">
+                Data and Charts
+            </button>
+        </nav>
+
+        <section id="one-health" class="tab-content">
+            <h2>One Health Approach</h2>
+            <p>Human, animal, and environmental health are connected.</p>
         </section>
-    </main>
-    <div id="map" aria-label="Map of the Americas">
-      <section class="date-filter" aria-labelledby="date-label">
-        <label id="date-label" for="date-slider">Select year</label>
-        <input id="date-slider" type="range" />
-        <output id="selected-year" for="date-slider"></output>
-      </section>
+
+        <section id="disease" class="tab-content" hidden>
+            <h2>Disease Information</h2>
+            <p id="disease-info">
+                Learn about the selected disease, its transmission,
+                prevention, and control.
+            </p>
+        </section>
+
+        <section id="data" class="tab-content" hidden>
+            <h2>Data and Charts</h2>
+
+            <p>Click a country on the map to learn more.</p>
+        </section>
+    </aside>
+
+
+
+
+<section class="map-panel">
+    <div id="map" aria-label="Map of the Americas"></div>
+
+    <div class="date-filter">
+        <label for="date-slider">Select year</label>
+        <input type="range" id="date-slider"
+               min="2000" max="2024" value="2024">
+        <output id="selected-year" for="date-slider">2024</output>
     </div>
-    <script src="dist/leaflet.js"></script>
-    <script src="locations.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/date-slider.js"></script>
-  </body>
-  </html>
+</section>
+
+
+
+
+</main>
+
+<script src="dist/leaflet.js"></script>
+<script src="locations.js"></script>
+<script src="js/map.js"></script>
+<script src="js/date-slider.js"></script>
+<script src="js/tabs.js"></script>
+
+</body>
+</html>

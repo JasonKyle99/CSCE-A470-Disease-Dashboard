@@ -43,11 +43,12 @@ COUNTRIES_IN_AMERICAS = [
 
 START_YEAR = 2000
 END_YEAR = 2026
-OUTPUT_FILE = Path(__file__).with_name("sample-data.csv")
+OUTPUT_FILE = Path(__file__).resolve().parent / "data" / "TB" / "Output Data" / "sample-data.csv"
 
 
 def generate_csv(output_file=OUTPUT_FILE):
 	"""Write one row per nation and year, with Nation+Year as the super key."""
+	output_file.parent.mkdir(parents=True, exist_ok=True)
 	with output_file.open("w", newline="", encoding="utf-8") as csvfile:
 		writer = csv.DictWriter(csvfile, fieldnames=["Nation", "Year", "TB Incidents Reported"])
 		writer.writeheader()

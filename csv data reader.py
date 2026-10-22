@@ -4,7 +4,7 @@ from pathlib import Path
 
 project_dir = Path(__file__).resolve().parent
 source_path = project_dir / "TB_burden_countries_2026-10-15.csv"
-output_path = project_dir / "data" / "data.csv"
+output_path = project_dir / "data" / "TB" / "Output Data" / "data.csv"
 output_path.parent.mkdir(parents=True, exist_ok=True)
 
 with source_path.open("r", newline="", encoding="utf-8-sig") as source_file:

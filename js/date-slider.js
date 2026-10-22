@@ -22,6 +22,7 @@ dateSlider.value = Number.isInteger(savedYear) &&
 
 function updateSelectedYear() {
     selectedYear.value = dateSlider.value;
+    selectedYear.textContent = dateSlider.value;
     localStorage.setItem(storageKey, dateSlider.value);
 }
 
