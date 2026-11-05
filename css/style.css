@@ -66,6 +66,7 @@ body {
 
 /* Navigation tabs */
 .tabs {
+  display: flex;
   gap: 0.5rem;
   margin: 1.5rem 0;
 }
@@ -79,6 +80,8 @@ body {
   text-align: middle;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
 }
 
 .tabs button:hover {
@@ -105,6 +108,12 @@ body {
 
 .tab-content p {
   line-height: 1.7;
+}
+
+.chart-container {
+  position: relative;
+  height: 280px;
+  width: 100%;
 }
 
 /* Country information card */

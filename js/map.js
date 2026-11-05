@@ -33,59 +33,25 @@ function normalizeCountryName(name) {
     return countryNameAliases[normalized] || normalized;
 }
 
-function parseCsvRow(row) {
-    var fields = [];
-    var field = '';
-    var insideQuotes = false;
-
-    for (var i = 0; i < row.length; i++) {
-        var character = row[i];
-
-        if (character === '"' && row[i + 1] === '"' && insideQuotes) {
-            field += '"';
-            i++;
-        } else if (character === '"') {
-            insideQuotes = !insideQuotes;
-        } else if (character === ',' && !insideQuotes) {
-            fields.push(field);
-            field = '';
-        } else {
-            field += character;
-        }
+function loadIncidentData(countries) {
+    if (!Array.isArray(countries)) {
+        throw new Error('The incident JSON must contain a list of countries.');
     }
 
-    fields.push(field);
-    return fields;
-}
-
-function loadIncidentData(csvText) {
-    var rows = csvText.trim().split(/\r?\n/).map(parseCsvRow);
-    var headers = rows[0].map(function (header) {
-        return header.trim().replace(/^\uFEFF/, '');
-    });
-    var nationIndex = headers.indexOf('Nation');
-    var yearIndex = headers.indexOf('Year');
-    var incidentsIndex = headers.indexOf('TB Incidents Reported');
-
-    if (nationIndex === -1 || yearIndex === -1 || incidentsIndex === -1) {
-        throw new Error('The incident CSV does not have the expected columns.');
-    }
-
-    rows.slice(1).forEach(function (row) {
-        var nation = normalizeCountryName(row[nationIndex].trim());
-        var year = row[yearIndex].trim();
-        var incidents = Number(row[incidentsIndex].trim());
-
-        if (!nation || !year || !Number.isFinite(incidents)) {
-            return;
+    countries.forEach(function (country) {
+        if (!country.country || !country.years || typeof country.years !== 'object') {
+            throw new Error('The incident JSON contains an invalid country entry.');
         }
 
-        maximumIncidentCount = Math.max(maximumIncidentCount, incidents);
+        var nation = normalizeCountryName(country.country);
+        incidentsByCountryAndYear[nation] = country.years;
 
-        if (!incidentsByCountryAndYear[nation]) {
-            incidentsByCountryAndYear[nation] = {};
-        }
-        incidentsByCountryAndYear[nation][year] = incidents;
+        Object.keys(country.years).forEach(function (year) {
+            var incidents = Number(country.years[year]);
+            if (Number.isFinite(incidents)) {
+                maximumIncidentCount = Math.max(maximumIncidentCount, incidents);
+            }
+        });
     });
 
     colorScaleMaximum = Math.ceil(maximumIncidentCount / 100) * 100;
@@ -187,11 +153,11 @@ Promise.all([
         }
         return response.json();
     }),
-    fetch('data/TB/Output%20Data/data.csv').then(function (response) {
+    fetch('data/TB/Output%20Data/data.json').then(function (response) {
         if (!response.ok) {
             throw new Error('Could not load incident data: ' + response.status);
         }
-        return response.text();
+        return response.json();
     })
 ]).then(function (results) {
     var countries = results[0];
@@ -243,9 +209,19 @@ function showFeatureName(e) {
     var incidentsByYear = incidentsByCountryAndYear[countryName];
     var incidents = incidentsByYear && incidentsByYear[dateSlider.value];
 
-    var popupText = feature.properties.ADMIN + ': ' + incidents.toLocaleString() + ' TB incidents in ' + dateSlider.value;
+    var popupText = incidents === undefined
+        ? feature.properties.ADMIN + ': No TB incident data for ' + dateSlider.value
+        : feature.properties.ADMIN + ': ' + incidents.toLocaleString() +
+            ' TB incidents in ' + dateSlider.value;
 
     e.target.bindPopup(popupText).openPopup();
+
+    document.dispatchEvent(new CustomEvent('countrySelected', {
+        detail: {
+            country: feature.properties.ADMIN,
+            years: incidentsByYear || {}
+        }
+    }));
 }
 
 /* Function that calls highlightFeature and resetHighlight */

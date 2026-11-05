@@ -56,6 +56,10 @@
             <h2>Data and Charts</h2>
 
             <p>Click a country on the map to learn more.</p>
+
+            <div class="chart-container">
+                <canvas id="tb-chart" aria-label="TB incidents by year"></canvas>
+            </div>
         </section>
     </aside>
 
@@ -78,9 +82,11 @@
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="dist/leaflet.js"></script>
 <script src="locations.js"></script>
 <script src="js/map.js"></script>
+<script src="js/chart.js"></script>
 <script src="js/date-slider.js"></script>
 <script src="js/tabs.js"></script>
 
