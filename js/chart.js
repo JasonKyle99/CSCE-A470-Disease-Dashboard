@@ -11,9 +11,14 @@
         data: {
             labels: chartYears,
             datasets: [{
-                label: 'TB incidents',
+                label: 'WHO',
                 data: chartYears.map(function () { return null; }),
                 borderColor: '#2563eb',
+                tension: 0.2
+            }, {
+                label: 'WAHIS',
+                data: chartYears.map(function () { return null; }),
+                borderColor: '#dc2626',
                 tension: 0.2
             }]
         },
@@ -33,18 +38,20 @@
     });
 
     function highlightSelectedYear() {
-        var dataset = chart.data.datasets[0];
         var selectedYear = slider.value;
 
-        dataset.pointRadius = chart.data.labels.map(function (year) {
-            return year === selectedYear ? 6 : 3;
-        });
-        dataset.pointBackgroundColor = chart.data.labels.map(function (year) {
-            return year === selectedYear ? '#fff' : '#2563eb';
-        });
-        dataset.pointBorderColor = '#2563eb';
-        dataset.pointBorderWidth = chart.data.labels.map(function (year) {
-            return year === selectedYear ? 3 : 1;
+        chart.data.datasets.forEach(function (dataset, datasetIndex) {
+            var pointColor = datasetIndex === 0 ? '#2563eb' : '#dc2626';
+            dataset.pointRadius = chart.data.labels.map(function (year) {
+                return year === selectedYear ? 6 : 3;
+            });
+            dataset.pointBackgroundColor = chart.data.labels.map(function (year) {
+                return year === selectedYear ? '#fff' : pointColor;
+            });
+            dataset.pointBorderColor = pointColor;
+            dataset.pointBorderWidth = chart.data.labels.map(function (year) {
+                return year === selectedYear ? 3 : 1;
+            });
         });
 
         chart.update('none');
@@ -55,14 +62,28 @@
     document.addEventListener('countrySelected', function (event) {
         var country = event.detail.country;
         var countryYears = event.detail.years;
-        var years = Object.keys(countryYears).sort(function (a, b) {
+        var wahisYears = event.detail.wahisYears || {};
+        var yearSet = {};
+
+        Object.keys(countryYears).forEach(function (year) {
+            yearSet[year] = true;
+        });
+        Object.keys(wahisYears).forEach(function (year) {
+            yearSet[year] = true;
+        });
+
+        var years = Object.keys(yearSet).sort(function (a, b) {
             return Number(a) - Number(b);
         });
 
         chart.data.labels = years.length > 0 ? years : chartYears;
-        chart.data.datasets[0].label = 'TB incidents - ' + country;
+        chart.data.datasets[0].label = 'WHO - ' + country;
         chart.data.datasets[0].data = years.map(function (year) {
             return countryYears[year];
+        });
+        chart.data.datasets[1].label = 'WAHIS - ' + country;
+        chart.data.datasets[1].data = years.map(function (year) {
+            return wahisYears[year] === undefined ? null : wahisYears[year];
         });
 
         highlightSelectedYear();

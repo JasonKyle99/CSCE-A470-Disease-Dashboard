@@ -1,5 +1,6 @@
 var geoJSON;
 var incidentsByCountryAndYear = {};
+var wahisCasesByCountryAndYear = {};
 var currentYearIncidents = [];
 var maximumIncidentCount = 0;
 var colorScaleMaximum = 0;
@@ -55,6 +56,41 @@ function loadIncidentData(countries) {
     });
 
     colorScaleMaximum = Math.ceil(maximumIncidentCount / 100) * 100;
+}
+
+function loadWahisData(countries) {
+    if (!countries || typeof countries !== 'object') {
+        throw new Error('The WAHIS JSON must contain country data.');
+    }
+
+    Object.keys(countries).forEach(function (country) {
+        var nation = normalizeCountryName(country);
+        var years = countries[country];
+        var casesByYear = {};
+
+        Object.keys(years).forEach(function (year) {
+            var diseaseEntries = years[year];
+            var totalCases = null;
+
+            Object.keys(diseaseEntries).forEach(function (diseaseName) {
+                var disease = diseaseEntries[diseaseName];
+                if (!disease || !disease.species) {
+                    return;
+                }
+
+                Object.keys(disease.species).forEach(function (speciesName) {
+                    var cases = disease.species[speciesName].cases;
+                    if (Number.isFinite(cases)) {
+                        totalCases = (totalCases || 0) + cases;
+                    }
+                });
+            });
+
+            casesByYear[year] = totalCases;
+        });
+
+        wahisCasesByCountryAndYear[nation] = casesByYear;
+    });
 }
 
 function getColor(value, minimum, maximum) {
@@ -158,10 +194,17 @@ Promise.all([
             throw new Error('Could not load incident data: ' + response.status);
         }
         return response.json();
+    }),
+    fetch('data/WAHIS-Data.json').then(function (response) {
+        if (!response.ok) {
+            throw new Error('Could not load WAHIS data: ' + response.status);
+        }
+        return response.json();
     })
 ]).then(function (results) {
     var countries = results[0];
     loadIncidentData(results[1]);
+    loadWahisData(results[2]);
 
     var americas = {
         type: countries.type,
@@ -207,19 +250,28 @@ function showFeatureName(e) {
     var feature = e.target.feature;
     var countryName = normalizeCountryName(feature.properties.ADMIN);
     var incidentsByYear = incidentsByCountryAndYear[countryName];
+    var wahisCasesByYear = wahisCasesByCountryAndYear[countryName];
     var incidents = incidentsByYear && incidentsByYear[dateSlider.value];
+    var animalCases = wahisCasesByYear && wahisCasesByYear[dateSlider.value];
 
-    var popupText = incidents === undefined
-        ? feature.properties.ADMIN + ': No TB incident data for ' + dateSlider.value
-        : feature.properties.ADMIN + ': ' + incidents.toLocaleString() +
-            ' TB incidents in ' + dateSlider.value;
+    var humanIncidentText = incidents === undefined || incidents === null
+        ? 'No data'
+        : incidents.toLocaleString();
+    var animalCaseText = animalCases === undefined || animalCases === null
+        ? 'No data'
+        : animalCases.toLocaleString();
+    var popupText = feature.properties.ADMIN + ':<br>' +
+        humanIncidentText + ' Human TB Incidents' + ' in ' + dateSlider.value + '<br>' +
+        animalCaseText + ' Animal TB Incidents ' +
+        'in ' + dateSlider.value;
 
     e.target.bindPopup(popupText).openPopup();
 
     document.dispatchEvent(new CustomEvent('countrySelected', {
         detail: {
             country: feature.properties.ADMIN,
-            years: incidentsByYear || {}
+            years: incidentsByYear || {},
+            wahisYears: wahisCasesByYear || {}
         }
     }));
 }
