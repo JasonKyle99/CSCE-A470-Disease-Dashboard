@@ -32,6 +32,26 @@
         }
     });
 
+    function highlightSelectedYear() {
+        var dataset = chart.data.datasets[0];
+        var selectedYear = slider.value;
+
+        dataset.pointRadius = chart.data.labels.map(function (year) {
+            return year === selectedYear ? 6 : 3;
+        });
+        dataset.pointBackgroundColor = chart.data.labels.map(function (year) {
+            return year === selectedYear ? '#fff' : '#2563eb';
+        });
+        dataset.pointBorderColor = '#2563eb';
+        dataset.pointBorderWidth = chart.data.labels.map(function (year) {
+            return year === selectedYear ? 3 : 1;
+        });
+
+        chart.update('none');
+    }
+
+    slider.addEventListener('input', highlightSelectedYear);
+
     document.addEventListener('countrySelected', function (event) {
         var country = event.detail.country;
         var countryYears = event.detail.years;
@@ -45,6 +65,6 @@
             return countryYears[year];
         });
 
-        chart.update();
+        highlightSelectedYear();
     });
 })();

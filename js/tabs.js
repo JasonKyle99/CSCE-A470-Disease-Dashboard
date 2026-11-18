@@ -12,6 +12,18 @@ buttons.forEach(button => {
     });
 });
 
+const dataButton = document.querySelector('.tabs button[data-tab="data"]');
+
+document.addEventListener("countrySelected", () => {
+    if (dataButton.classList.contains("active")) {
+        return;
+    }
+
+    dataButton.classList.remove("country-selected-glow");
+    void dataButton.offsetWidth;
+    dataButton.classList.add("country-selected-glow");
+});
+
 const diseaseSelect = document.getElementById("disease-select");
 
 diseaseSelect.addEventListener("change", () => {
